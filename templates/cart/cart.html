@@ -1,0 +1,442 @@
+{% extends 'base.html' %}
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+  * { font-family: 'Poppins', sans-serif; }
+
+  .cart-header {
+    background: linear-gradient(135deg, #2c4a3e, #3a5a47);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cart-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #a8d5a2 0%, transparent 70%);
+    opacity: 0.3;
+    border-radius: 50%;
+  }
+
+  .cart-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cart-header p {
+    font-size: 14px;
+    opacity: 0.7;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cart-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .cart-items-section {
+    background: white;
+    border: 1px solid #eef2eb;
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a2e24;
+    margin-bottom: 20px;
+  }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 16px;
+    padding: 16px;
+    background: #f8faf6;
+    border: 1px solid #eef2eb;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+
+  .item-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #e8f0e4;
+  }
+
+  .item-image-placeholder {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #e8f0e4, #d4e6cc);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+  }
+
+  .item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .item-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a2e24;
+    margin-bottom: 2px;
+  }
+
+  .item-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2c4a3e;
+  }
+
+  .item-stock {
+    font-size: 11px;
+    color: #6b8f71;
+  }
+
+  .item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid #dde8d8;
+    border-radius: 10px;
+    padding: 4px;
+  }
+
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #f8faf6;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c4a3e;
+    transition: all 0.2s;
+  }
+
+  .qty-btn:hover {
+    background: #2c4a3e;
+    color: white;
+  }
+
+  .qty-input {
+    width: 40px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a2e24;
+    outline: none;
+  }
+
+  .btn-remove {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid #fce8e8;
+    border-radius: 8px;
+    color: #c62828;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-remove:hover {
+    background: #fce8e8;
+  }
+
+  .item-subtotal {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2c4a3e;
+    margin-top: 8px;
+  }
+
+  .cart-summary {
+    background: white;
+    border: 1px solid #eef2eb;
+    border-radius: 16px;
+    padding: 24px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    font-size: 14px;
+  }
+
+  .summary-row.total {
+    border-top: 2px solid #eef2eb;
+    margin-top: 12px;
+    padding-top: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c4a3e;
+  }
+
+  .btn-checkout {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #2c4a3e, #3a5a47);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 16px;
+    text-decoration: none;
+    display: flex;  /* ← change from block to flex */
+    align-items: center;
+    justify-content: center;
+    gap: 8px;  /* ← add this */
+    text-align: center;
+  }
+
+  .btn-clear {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #fce8e8;
+    border-radius: 12px;
+    color: #c62828;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 12px;
+  }
+
+  .btn-clear:hover {
+    background: #fce8e8;
+  }
+
+  .empty-cart {
+    text-align: center;
+    padding: 80px 20px;
+    color: #6b8f71;
+  }
+
+  .empty-cart i {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-cart h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a2e24;
+    margin-bottom: 8px;
+  }
+
+  .empty-cart p {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .btn-shop {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #2c4a3e;
+    color: white;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-shop:hover {
+    background: #3a5a47;
+    transform: translateY(-1px);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .cart-layout {
+      grid-template-columns: 1fr;
+    }
+    .cart-item {
+      grid-template-columns: 80px 1fr;
+    }
+    .item-actions {
+      grid-column: 2;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+  }
+</style>
+
+<!-- Cart Header -->
+<div class="cart-header">
+  <h1>🛒 Shopping Cart</h1>
+  <p>Review your items before checkout</p>
+</div>
+
+{% if cart_items %}
+  <div class="cart-layout">
+    <!-- Cart Items -->
+    <div class="cart-items-section">
+      <div class="section-title">Cart Items ({{ cart.get_item_count }})</div>
+
+      {% for item in cart_items %}
+        <div class="cart-item">
+          <!-- Image -->
+          <div>
+            {% if item.product.image %}
+              <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="item-image">
+            {% else %}
+              <div class="item-image-placeholder">🛍️</div>
+            {% endif %}
+          </div>
+
+          <!-- Info -->
+          <div class="item-info">
+            <div class="item-name">{{ item.product.name }}</div>
+            <div class="item-price">${{ item.product.price }}</div>
+            <div class="item-stock">{{ item.product.stock }} in stock</div>
+          </div>
+
+          <!-- Actions -->
+          <div class="item-actions">
+            <!-- Quantity Controls -->
+            <form method="POST" action="{% url 'update_cart' item.id %}" style="display: inline;">
+              {% csrf_token %}
+              <div class="quantity-controls">
+                <button type="button" class="qty-btn" onclick="decrementQty({{ item.id }})">−</button>
+                <input type="number" name="quantity" id="qty-{{ item.id }}" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="qty-input" readonly>
+                <button type="button" class="qty-btn" onclick="incrementQty({{ item.id }}, {{ item.product.stock }})">+</button>
+              </div>
+              <button type="submit" style="display: none;" id="update-{{ item.id }}">Update</button>
+            </form>
+
+            <!-- Remove Button -->
+            <form method="POST" action="{% url 'remove_from_cart' item.id %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-remove">
+                <i class="fas fa-trash"></i> Remove
+              </button>
+            </form>
+
+            <!-- Subtotal -->
+            <div class="item-subtotal">${{ item.get_subtotal }}</div>
+          </div>
+        </div>
+      {% endfor %}
+
+      <!-- Clear Cart -->
+      <form method="POST" action="{% url 'clear_cart' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-clear">
+          <i class="fas fa-trash-alt"></i> Clear Cart
+        </button>
+      </form>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary">
+      <div class="section-title">Order Summary</div>
+      
+      <div class="summary-row">
+        <span>Subtotal ({{ cart.get_item_count }} items)</span>
+        <span>${{ cart.get_total }}</span>
+      </div>
+      
+      <div class="summary-row">
+        <span>Shipping</span>
+        <span>FREE</span>
+      </div>
+      
+      <div class="summary-row total">
+        <span>Total</span>
+        <span>${{ cart.get_total }}</span>
+      </div>
+
+      <a href="{% url 'checkout' %}" class="btn-checkout"></a>
+        <i class="fas fa-lock"></i> Proceed to Checkout
+      </a>
+
+      <a href="{% url 'product_list' %}" style="display: block; text-align: center; margin-top: 16px; color: #4a7c59; text-decoration: none; font-size: 13px; font-weight: 500;">
+        <i class="fas fa-arrow-left"></i> Continue Shopping
+      </a>
+    </div>
+  </div>
+
+{% else %}
+  <!-- Empty Cart -->
+  <div class="empty-cart">
+    <div><i class="fas fa-shopping-cart"></i></div>
+    <h3>Your cart is empty</h3>
+    <p>Add some products to get started!</p>
+    <a href="{% url 'product_list' %}" class="btn-shop">
+      <i class="fas fa-store"></i> Browse Products
+    </a>
+  </div>
+{% endif %}
+
+{% block scripts %}
+<script>
+  function incrementQty(itemId, maxStock) {
+    const input = document.getElementById('qty-' + itemId);
+    const currentQty = parseInt(input.value);
+    if (currentQty < maxStock) {
+      input.value = currentQty + 1;
+      document.getElementById('update-' + itemId).click();
+    }
+  }
+
+  function decrementQty(itemId) {
+    const input = document.getElementById('qty-' + itemId);
+    const currentQty = parseInt(input.value);
+    if (currentQty > 1) {
+      input.value = currentQty - 1;
+      document.getElementById('update-' + itemId).click();
+    }
+  }
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+  * { font-family: 'Poppins', sans-serif; }
+
+  .order-detail-header {
+    background: linear-gradient(135deg, #2c4a3e, #3a5a47);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .order-detail-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #a8d5a2 0%, transparent 70%);
+    opacity: 0.3;
+    border-radius: 50%;
+  }
+
+  .order-detail-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .order-detail-header p {
+    font-size: 14px;
+    opacity: 0.7;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .detail-section {
+    background: white;
+    border: 1px solid #eef2eb;
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a2e24;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #eef2eb;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+  }
+
+  .status-pending { background: #fff3e0; color: #e65100; }
+  .status-processing { background: #e3f2fd; color: #1565c0; }
+  .status-shipped { background: #f3e5f5; color: #6a1b9a; }
+  .status-delivered { background: #e8f5e9; color: #2e7d32; }
+  .status-cancelled { background: #ffebee; color: #c62828; }
+
+  .tracking-timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .tracking-step {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  .tracking-step::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dde8d8;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #dde8d8;
+  }
+
+  .tracking-step.active::before {
+    background: #2c4a3e;
+    box-shadow: 0 0 0 2px #2c4a3e;
+  }
+
+  .tracking-step::after {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 20px;
+    width: 2px;
+    height: calc(100% + 4px);
+    background: #dde8d8;
+  }
+
+  .tracking-step:last-child::after {
+    display: none;
+  }
+
+  .tracking-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a2e24;
+    margin-bottom: 4px;
+  }
+
+  .tracking-step.active .tracking-title {
+    color: #2c4a3e;
+  }
+
+  .tracking-date {
+    font-size: 12px;
+    color: #6b8f71;
+  }
+
+  .order-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: #f8faf6;
+    border: 1px solid #eef2eb;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+
+  .item-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #e8f0e4;
+  }
+
+  .item-image-placeholder {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #e8f0e4, #d4e6cc);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .item-info {
+    flex: 1;
+  }
+
+  .item-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a2e24;
+    margin-bottom: 4px;
+  }
+
+  .item-qty {
+    font-size: 12px;
+    color: #6b8f71;
+    margin-bottom: 8px;
+  }
+
+  .item-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2c4a3e;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #eef2eb;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: #6b8f71;
+    font-weight: 500;
+  }
+
+  .info-value {
+    color: #1a2e24;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 14px;
+  }
+
+  .summary-row.total {
+    border-top: 2px solid #eef2eb;
+    margin-top: 12px;
+    padding-top: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c4a3e;
+  }
+
+  .btn-back {
+    display: inline-block;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid #dde8d8;
+    border-radius: 10px;
+    color: #4a7c59;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover {
+    background: #f8faf6;
+    border-color: #4a7c59;
+    color: #2c4a3e;
+  }
+
+  @media (max-width: 768px) {
+    .detail-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<!-- Order Header -->
+<div class="order-detail-header">
+  <h1>Order #{{ order.order_number }}</h1>
+  <p>Placed on {{ order.created_at|date:"M d, Y - h:i A" }}</p>
+</div>
+
+<div style="margin-bottom: 20px;">
+  <a href="{% url 'order_history' %}" class="btn-back">
+    <i class="fas fa-arrow-left"></i> Back to Orders
+  </a>
+</div>
+
+<div class="detail-grid">
+  <!-- Left Column -->
+  <div>
+    <!-- Order Items -->
+    <div class="detail-section" style="margin-bottom: 24px;">
+      <div class="section-title">Order Items</div>
+      {% for item in order.items.all %}
+        <div class="order-item">
+          <div>
+            {% if item.product and item.product.image %}
+              <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" class="item-image">
+            {% else %}
+              <div class="item-image-placeholder">🛍️</div>
+            {% endif %}
+          </div>
+          <div class="item-info">
+            <div class="item-name">{{ item.product_name }}</div>
+            <div class="item-qty">Quantity: {{ item.quantity }}</div>
+            <div class="item-price">${{ item.product_price }} each</div>
+          </div>
+          <div style="text-align: right;">
+            <div class="item-price">${{ item.get_subtotal }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Shipping Info -->
+    <div class="detail-section">
+      <div class="section-title">Shipping Information</div>
+      <div class="info-row">
+        <span class="info-label">Name</span>
+        <span class="info-value">{{ order.full_name }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value">{{ order.email }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Phone</span>
+        <span class="info-value">{{ order.phone }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Address</span>
+        <span class="info-value" style="max-width: 60%;">{{ order.address }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">City</span>
+        <span class="info-value">{{ order.city }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Postal Code</span>
+        <span class="info-value">{{ order.postal_code }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Country</span>
+        <span class="info-value">{{ order.country }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column -->
+  <div>
+    <!-- Order Status -->
+    <div class="detail-section" style="margin-bottom: 24px;">
+      <div class="section-title">Order Status</div>
+      <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+
+      <div class="tracking-timeline">
+        <div class="tracking-step {% if order.status == 'pending' or order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+          <div class="tracking-title">Order Placed</div>
+          <div class="tracking-date">{{ order.created_at|date:"M d, Y" }}</div>
+        </div>
+        <div class="tracking-step {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+          <div class="tracking-title">Processing</div>
+          <div class="tracking-date">{% if order.status != 'pending' %}{{ order.updated_at|date:"M d, Y" }}{% else %}Pending{% endif %}</div>
+        </div>
+        <div class="tracking-step {% if order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+          <div class="tracking-title">Shipped</div>
+          <div class="tracking-date">{% if order.status == 'shipped' or order.status == 'delivered' %}{{ order.updated_at|date:"M d, Y" }}{% else %}Pending{% endif %}</div>
+        </div>
+        <div class="tracking-step {% if order.status == 'delivered' %}active{% endif %}">
+          <div class="tracking-title">Delivered</div>
+          <div class="tracking-date">{% if order.status == 'delivered' %}{{ order.updated_at|date:"M d, Y" }}{% else %}Pending{% endif %}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="detail-section">
+      <div class="section-title">Order Summary</div>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span>${{ order.total_amount }}</span>
+      </div>
+      <div class="summary-row">
+        <span>Shipping</span>
+        <span>FREE</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span>${{ order.total_amount }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

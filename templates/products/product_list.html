@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+  * { font-family: 'Poppins', sans-serif; }
+
+  .shop-header {
+    background: linear-gradient(135deg, #2c4a3e, #3a5a47);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shop-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #a8d5a2 0%, transparent 70%);
+    opacity: 0.3;
+    border-radius: 50%;
+  }
+
+  .shop-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .shop-header p {
+    font-size: 14px;
+    opacity: 0.7;
+    margin: 0;
+  }
+
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 1px solid #dde8d8;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    background: #f8faf6;
+    transition: all 0.2s;
+  }
+
+  .search-input:focus {
+    border-color: #4a7c59;
+    box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
+  }
+
+  .btn-search {
+    padding: 12px 24px;
+    background: #2c4a3e;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-search:hover {
+    background: #3a5a47;
+    transform: translateY(-1px);
+  }
+
+  .filters-panel {
+    background: #f8faf6;
+    border: 1px solid #dde8d8;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .filters-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2c4a3e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .category-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .category-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #dde8d8;
+    background: white;
+    font-size: 12px;
+    font-weight: 500;
+    color: #4a7c59;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .category-pill:hover,
+  .category-pill.active {
+    background: #2c4a3e;
+    color: white;
+    border-color: #2c4a3e;
+  }
+
+  .price-filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .price-input {
+    width: 110px;
+    padding: 8px 12px;
+    border: 1px solid #dde8d8;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    background: white;
+  }
+
+  .price-input:focus {
+    border-color: #4a7c59;
+  }
+
+  .sort-select {
+    padding: 8px 12px;
+    border: 1px solid #dde8d8;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    background: white;
+    color: #2c4a3e;
+    cursor: pointer;
+  }
+
+  .btn-filter {
+    padding: 8px 18px;
+    background: #4a7c59;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-filter:hover { background: #2c4a3e; }
+
+  .results-count {
+    font-size: 13px;
+    color: #6b8f71;
+    margin-bottom: 20px;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #eef2eb;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(44, 74, 62, 0.12);
+    border-color: #a8d5a2;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #f0f5ee;
+  }
+
+  .product-image-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #e8f0e4, #d4e6cc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+  }
+
+  .product-info {
+    padding: 16px;
+  }
+
+  .product-category {
+    font-size: 11px;
+    color: #4a7c59;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .product-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a2e24;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .product-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .stars { color: #f4a432; font-size: 12px; }
+  .rating-count { font-size: 11px; color: #9ab89f; }
+
+  .product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .product-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c4a3e;
+  }
+
+  .stock-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .in-stock {
+    background: #e8f5e4;
+    color: #2e7d32;
+  }
+
+  .out-of-stock {
+    background: #fce8e8;
+    color: #c62828;
+  }
+
+  .no-products {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b8f71;
+  }
+
+  .no-products i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+</style>
+
+<!-- Shop Header -->
+<div class="shop-header">
+  <h1>🛍️ Our Products</h1>
+  <p>Discover our collection of quality products</p>
+</div>
+
+<!-- Search -->
+<form method="GET">
+  <div class="search-bar">
+    <input
+      type="text"
+      name="q"
+      class="search-input"
+      placeholder="Search products..."
+      value="{{ query|default:'' }}"
+    >
+    <button type="submit" class="btn-search">
+      <i class="fas fa-search"></i> Search
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-panel">
+    <div class="filters-title">Filters</div>
+
+    <!-- Categories -->
+    <div class="category-pills">
+      <a href="/products/" class="category-pill {% if not active_category %}active{% endif %}">
+        All
+      </a>
+      {% for category in categories %}
+        <a href="?category={{ category.slug }}" class="category-pill {% if active_category.slug == category.slug %}active{% endif %}">
+          {{ category.name }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- Price & Sort -->
+    <div class="price-filters">
+      <input type="number" name="min_price" class="price-input" placeholder="Min price" value="{{ request.GET.min_price }}">
+      <span style="color: #9ab89f; font-size: 13px;">to</span>
+      <input type="number" name="max_price" class="price-input" placeholder="Max price" value="{{ request.GET.max_price }}">
+      <select name="sort" class="sort-select">
+        <option value="">Sort by</option>
+        <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+        <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+        <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+      </select>
+      <button type="submit" class="btn-filter">Apply</button>
+    </div>
+  </div>
+</form>
+
+<!-- Results Count -->
+<div class="results-count">
+  Showing {{ products|length }} product{{ products|length|pluralize }}
+  {% if query %} for "<strong>{{ query }}</strong>"{% endif %}
+  {% if active_category %} in <strong>{{ active_category.name }}</strong>{% endif %}
+</div>
+
+<!-- Products Grid -->
+{% if products %}
+  <div class="products-grid">
+    {% for product in products %}
+      <a href="/products/{{ product.slug }}/" class="product-card">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+        {% else %}
+          <div class="product-image-placeholder">🛍️</div>
+        {% endif %}
+        <div class="product-info">
+          <div class="product-category">{{ product.category.name }}</div>
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-rating">
+            <div class="stars">
+              {% with rating=product.average_rating %}
+                {% for i in "12345" %}
+                  {% if forloop.counter <= rating %}
+                    <i class="fas fa-star"></i>
+                  {% else %}
+                    <i class="far fa-star"></i>
+                  {% endif %}
+                {% endfor %}
+              {% endwith %}
+            </div>
+            <span class="rating-count">({{ product.reviews.count }})</span>
+          </div>
+          <div class="product-footer">
+            <div class="product-price">${{ product.price }}</div>
+            {% if product.is_in_stock %}
+              <span class="stock-badge in-stock">In Stock</span>
+            {% else %}
+              <span class="stock-badge out-of-stock">Out of Stock</span>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="no-products">
+    <div><i class="fas fa-box-open"></i></div>
+    <h5>No products found</h5>
+    <p>Try adjusting your search or filters</p>
+  </div>
+{% endif %}
+
+{% endblock %}

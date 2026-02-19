@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+  * { font-family: 'Poppins', sans-serif; }
+
+  .orders-header {
+    background: linear-gradient(135deg, #2c4a3e, #3a5a47);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .orders-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #a8d5a2 0%, transparent 70%);
+    opacity: 0.3;
+    border-radius: 50%;
+  }
+
+  .orders-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .orders-header p {
+    font-size: 14px;
+    opacity: 0.7;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .order-card {
+    background: white;
+    border: 1px solid #eef2eb;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+
+  .order-card:hover {
+    box-shadow: 0 8px 24px rgba(44, 74, 62, 0.08);
+    border-color: #a8d5a2;
+  }
+
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eef2eb;
+  }
+
+  .order-number {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a2e24;
+  }
+
+  .order-date {
+    font-size: 12px;
+    color: #6b8f71;
+  }
+
+  .status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-pending {
+    background: #fff3e0;
+    color: #e65100;
+  }
+
+  .status-processing {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  .status-shipped {
+    background: #f3e5f5;
+    color: #6a1b9a;
+  }
+
+  .status-delivered {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .status-cancelled {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .order-item-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #4a6652;
+  }
+
+  .order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #eef2eb;
+  }
+
+  .order-total {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c4a3e;
+  }
+
+  .btn-view-order {
+    padding: 8px 18px;
+    background: #2c4a3e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-view-order:hover {
+    background: #3a5a47;
+    transform: translateY(-1px);
+    color: white;
+  }
+
+  .no-orders {
+    text-align: center;
+    padding: 80px 20px;
+    color: #6b8f71;
+  }
+
+  .no-orders i {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .no-orders h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a2e24;
+    margin-bottom: 8px;
+  }
+
+  .no-orders p {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .btn-shop {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #2c4a3e;
+    color: white;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-shop:hover {
+    background: #3a5a47;
+    transform: translateY(-1px);
+    color: white;
+  }
+</style>
+
+<!-- Orders Header -->
+<div class="orders-header">
+  <h1>📦 My Orders</h1>
+  <p>Track and manage your orders</p>
+</div>
+
+{% if orders %}
+  {% for order in orders %}
+    <div class="order-card">
+      <div class="order-header">
+        <div>
+          <div class="order-number">Order #{{ order.order_number }}</div>
+          <div class="order-date">{{ order.created_at|date:"M d, Y - h:i A" }}</div>
+        </div>
+        <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+      </div>
+
+      <div class="order-items">
+        {% for item in order.items.all %}
+          <div class="order-item-row">
+            <span>{{ item.quantity }}x {{ item.product_name }}</span>
+            <span>${{ item.get_subtotal }}</span>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="order-footer">
+        <div class="order-total">Total: ${{ order.total_amount }}</div>
+        <a href="{% url 'order_detail' order.id %}" class="btn-view-order">
+          View Details <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  {% endfor %}
+
+{% else %}
+  <div class="no-orders">
+    <div><i class="fas fa-box-open"></i></div>
+    <h3>No orders yet</h3>
+    <p>Start shopping and your orders will appear here!</p>
+    <a href="{% url 'product_list' %}" class="btn-shop">
+      <i class="fas fa-store"></i> Browse Products
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}
